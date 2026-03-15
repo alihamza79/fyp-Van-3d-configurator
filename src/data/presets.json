@@ -1,0 +1,460 @@
+[
+  {
+    "title": "Compact Setting",
+    "timestamp": 1739560014671,
+    "previewImage": "/presets/compact.png",
+    "data": {
+      "cameraConfig": {
+        "cameraPosition": [
+          3,
+          2.6,
+          0.8
+        ],
+        "lookAt": [
+          1,
+          1,
+          0
+        ],
+        "view": "corner",
+        "fov": 55
+      },
+      "vanProducts": [
+        {
+          "id": "full_bed",
+          "modelPath": "/Full-Bed.glb",
+          "scale": [
+            0.6,
+            0.57,
+            0.57
+          ],
+          "initialPosition": [
+            0,
+            -0.8,
+            0
+          ],
+          "name": "Full Bed",
+          "price": 500,
+          "image": "/images/Full-Bed.png",
+          "description": "Comfortable full-size bed",
+          "isFavorite": false,
+          "dimensions": {
+            "width": 0.57,
+            "height": 0.57,
+            "depth": 0.57
+          },
+          "vanBounds": {
+            "x": [
+              -0.45,
+              0.25
+            ],
+            "z": [
+              -2,
+              0
+            ]
+          },
+          "yAxisMove": false,
+          "visible": false,
+          "quantity": 1
+        },
+        {
+          "id": "sliding_drawer",
+          "modelPath": "/Sliding_Drawer.glb",
+          "scale": [
+            0.35,
+            0.35,
+            0.35
+          ],
+          "initialPosition": [
+            0,
+            -0.8,
+            0
+          ],
+          "name": "Sliding Drawer",
+          "price": 150,
+          "image": "/images/Sliding_Drawer.png",
+          "description": "Sliding drawer",
+          "isFavorite": false,
+          "dimensions": {
+            "width": 0.35,
+            "height": 0.35,
+            "depth": 0.35
+          },
+          "vanBounds": {
+            "x": [
+              -0.72,
+              0.72
+            ],
+            "z": [
+              -2.6,
+              0.3
+            ]
+          },
+          "yAxisMove": true,
+          "visible": false,
+          "quantity": 2
+        },
+        {
+          "id": "gas_stove",
+          "modelPath": "/Gas-Stove.glb",
+          "scale": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "initialPosition": [
+            0,
+            -0.8,
+            0
+          ],
+          "name": "Gas Stove With Oven",
+          "price": 400,
+          "image": "/images/Gas-Stove.png",
+          "description": "A modern gas stove for cooking",
+          "isFavorite": false,
+          "dimensions": {
+            "width": 0.75,
+            "height": 0.75,
+            "depth": 0.75
+          },
+          "vanBounds": {
+            "x": [
+              -0.55,
+              0.55
+            ],
+            "z": [
+              -2.5,
+              0.11
+            ]
+          },
+          "yAxisMove": false,
+          "visible": false,
+          "quantity": 1
+        },
+        {
+          "id": "round_table",
+          "modelPath": "/Round-Table.glb",
+          "scale": [
+            0.7,
+            0.7,
+            0.7
+          ],
+          "initialPosition": [
+            0,
+            -0.8,
+            0
+          ],
+          "name": "Round Table",
+          "price": 180,
+          "image": "/images/Round-Table.png",
+          "description": "A stylish round table",
+          "isFavorite": false,
+          "dimensions": {
+            "width": 1,
+            "height": 1,
+            "depth": 1
+          },
+          "vanBounds": {
+            "x": [
+              -0.5,
+              0.5
+            ],
+            "z": [
+              -2.5,
+              0.06
+            ]
+          },
+          "yAxisMove": false,
+          "visible": false,
+          "quantity": 1
+        },
+        {
+          "id": "chair",
+          "modelPath": "/Chair.glb",
+          "scale": [
+            0.3,
+            0.3,
+            0.3
+          ],
+          "initialPosition": [
+            0,
+            -0.6,
+            0
+          ],
+          "name": "Chair",
+          "price": 150,
+          "image": "/images/Chair.png",
+          "description": "A comfortable chair",
+          "isFavorite": false,
+          "dimensions": {
+            "width": 0.5,
+            "height": 0.5,
+            "depth": 0.5
+          },
+          "vanBounds": {
+            "x": [
+              -0.4,
+              0.4
+            ],
+            "z": [
+              -2,
+              0.2
+            ]
+          },
+          "yAxisMove": false,
+          "visible": false,
+          "quantity": 2
+        },
+        {
+          "id": "wall_cabinet",
+          "modelPath": "/wall-cabinet.glb",
+          "scale": [
+            0.75,
+            0.75,
+            0.75
+          ],
+          "initialPosition": [
+            0,
+            -0.8,
+            0
+          ],
+          "name": "Wall Cabinet",
+          "price": 400,
+          "image": "/images/wall-cabinet.png",
+          "description": "A stylish wall cabinet for storage",
+          "isFavorite": false,
+          "dimensions": {
+            "width": 0.7,
+            "height": 0.7,
+            "depth": 0.3
+          },
+          "vanBounds": {
+            "x": [
+              -0.5,
+              0.5
+            ],
+            "z": [
+              -2,
+              0.2
+            ]
+          },
+          "yAxisMove": false,
+          "visible": false,
+          "quantity": 2
+        },
+        {
+          "id": "portable_toilet",
+          "modelPath": "/Portable-toilet2.glb",
+          "scale": [
+            0.7,
+            0.7,
+            0.7
+          ],
+          "initialPosition": [
+            0,
+            -0.5,
+            0
+          ],
+          "name": "Portable Toilet",
+          "price": 250,
+          "image": "/images/Portable-toilet2.png",
+          "description": "A portable toilet",
+          "isFavorite": false,
+          "dimensions": {
+            "width": 0.5,
+            "height": 0.5,
+            "depth": 0.5
+          },
+          "vanBounds": {
+            "x": [
+              -0.7,
+              0.7
+            ],
+            "z": [
+              -2.5,
+              0.2
+            ]
+          },
+          "yAxisMove": false,
+          "visible": false,
+          "quantity": 1
+        },
+        {
+          "id": "sink_with_cabinet_new",
+          "modelPath": "/Sink-withCabinet.glb",
+          "scale": [
+            0.62,
+            0.62,
+            0.62
+          ],
+          "initialPosition": [
+            0,
+            -0.8,
+            0
+          ],
+          "name": "Sink with Cabinet New",
+          "price": 350,
+          "image": "/images/Sink-withCabinet.png",
+          "description": "A new sink with a cabinet for storage",
+          "isFavorite": false,
+          "dimensions": {
+            "width": 0.6,
+            "height": 0.6,
+            "depth": 0.6
+          },
+          "vanBounds": {
+            "x": [
+              -0.75,
+              0.75
+            ],
+            "z": [
+              -2,
+              0.1
+            ]
+          },
+          "yAxisMove": false,
+          "visible": false,
+          "quantity": 1
+        }
+      ],
+      "productInstances": {
+        "solar_panel": [
+          {
+            "id": "36e1eed2-d6a0-47a9-9980-bb51ef4f370d",
+            "position": [
+              0.007773437500000001,
+              1.27,
+              0.2
+            ]
+          }
+        ],
+        "vent": [
+          {
+            "id": "a8becfd2-b6df-423f-bf2a-c59e5ad08212",
+            "position": [
+              0,
+              1.15,
+              -2
+            ]
+          }
+        ],
+        "full_bed": [
+          {
+            "id": "bd555520-1f7c-4fdb-918a-3f0ede292947",
+            "position": [
+              -0.17059580925554996,
+              -0.14999999999999947,
+              -2.1
+            ],
+            "rotation": 0
+          }
+        ],
+        "sliding_drawer": [
+          {
+            "id": "7f68abc4-4298-486b-baff-5c906de4a0d3",
+            "position": [
+              -0.35612389389481297,
+              -0.8,
+              -1.87873936323589
+            ],
+            "rotation": -90
+          },
+          {
+            "id": "4c76d666-002c-4b8f-a55b-74fad278252a",
+            "position": [
+              0.20042334211541205,
+              -0.8,
+              -1.8765951731423607
+            ],
+            "rotation": -90
+          }
+        ],
+        "gas_stove": [
+          {
+            "id": "7e329d38-46ab-40db-83ce-32b228c200be",
+            "position": [
+              -0.6,
+              -0.8,
+              -0.5155943363237625
+            ],
+            "rotation": 91
+          }
+        ],
+        "single_chair": [],
+        "double_table": [],
+        "round_table": [
+          {
+            "id": "efb901f9-ec88-47fb-ac71-fc6cb7c35547",
+            "position": [
+              0.55,
+              -0.8,
+              -0.6464290678728526
+            ],
+            "rotation": 0
+          }
+        ],
+        "chair": [
+          {
+            "id": "d28c1b48-50dc-4122-bb2f-15a060e27f48",
+            "position": [
+              0.5700658114800132,
+              -0.68,
+              -1.3036327563096368
+            ],
+            "rotation": -91
+          },
+          {
+            "id": "ec1ab28f-552d-415f-abac-33c4f2737dbe",
+            "position": [
+              0.5496544513884936,
+              -0.68,
+              0.030620972077906747
+            ],
+            "rotation": 90
+          }
+        ],
+        "wall_cabinet": [
+          {
+            "id": "72667cea-5e3c-41ef-b7ae-0878c3a8a594",
+            "position": [
+              0.4921484375,
+              0.8900000000000011,
+              -0.375310529306143
+            ],
+            "rotation": -90
+          },
+          {
+            "id": "50f265ad-2d9b-4b96-af7d-cbf24f868f85",
+            "position": [
+              0.4923565466570903,
+              0.8900000000000011,
+              -1.8640279559971056
+            ],
+            "rotation": -90
+          }
+        ],
+        "portable_toilet": [
+          {
+            "id": "e829b8a2-9525-4f22-ae3f-96da722c36e0",
+            "position": [
+              -0.7,
+              -0.5,
+              -0.026149357747888485
+            ],
+            "rotation": 0
+          }
+        ],
+        "sink_with_cabinet_new": [
+          {
+            "id": "e8a85fa4-8a24-42a5-bb07-3f1b25cebfe7",
+            "position": [
+              -0.6917752613453987,
+              -0.2699999999999996,
+              -1.243970469808889
+            ],
+            "rotation": 90
+          }
+        ]
+      }
+    }
+  }
+]
