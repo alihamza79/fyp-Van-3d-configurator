@@ -1,0 +1,17 @@
+/* src/components/instances/CabinetInstance.css */
+canvas.draggable {
+    cursor: move; /* fallback */
+    cursor: all-scroll;
+  }
+  
+  canvas.dragging {
+    cursor: grabbing;
+  }
+  
+  /* For browsers that support custom cursors */
+  @supports (cursor: -webkit-grab) or (cursor: grab) {
+    canvas.draggable {
+      cursor: -webkit-grab;
+      cursor: grab;
+    }
+  }
