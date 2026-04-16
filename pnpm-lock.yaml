@@ -38,6 +38,9 @@ importers:
       '@react-three/postprocessing':
         specifier: ^2.16.6
         version: 2.19.1(@react-three/fiber@8.18.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react-native@0.85.1(@babel/core@7.29.0)(@types/react@18.3.28)(react@18.3.1))(react@18.3.1)(three@0.168.0))(@types/three@0.183.1)(react@18.3.1)(three@0.168.0)
+      '@use-gesture/react':
+        specifier: ^10.3.1
+        version: 10.3.1(react@18.3.1)
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
