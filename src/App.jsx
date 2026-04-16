@@ -7,6 +7,8 @@ import Scene from './components/Scene';
 import Sidebar from './components/Sidebar';
 import ViewSelector from './components/ViewSelector';
 import Navbar from './components/Navbar';
+import VanPaintPanel from './components/VanPaintPanel';
+import ShortcutsHelp from './components/ShortcutsHelp';
 import { Toaster } from 'react-hot-toast';
 import {useProductStore} from './store/productStore';
 
@@ -199,6 +201,8 @@ const App = () => {
           />
         </div>
       </div>
+      <VanPaintPanel />
+      <ShortcutsHelp />
       <Toaster />
     </>
   );

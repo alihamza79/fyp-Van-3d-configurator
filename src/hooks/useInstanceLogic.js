@@ -6,6 +6,7 @@ import useHighlightOnDrag from './useHighlightOnDrag';
 import useClickOutside from './useClickOutside';
 import { useFrame } from '@react-three/fiber';
 import { useBuildStore } from '../store/buildStore'; // Import the buildStore
+import { applyCustomizationToScene, highlightMesh, clearHighlight } from '../utils/applyCustomization';
 
 // Global cache for processed GLTF scenes keyed by gltfPath
 const sceneCache = {};
@@ -24,6 +25,13 @@ const useInstanceLogic = (productId, instanceId, gltfPath, initialPosition, view
   const cabinetRef = useRef();
   const [clonedScene, setClonedScene] = useState(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const [selectedMeshName, setSelectedMeshName] = useState(null);
+  const [meshNames, setMeshNames] = useState([]);
+
+  // Subscribe to the live customization for this instance so changes re-apply.
+  const customization = useBuildStore((state) =>
+    state.productInstances[productId]?.find((inst) => inst.id === instanceId)?.customization
+  );
 
   const { bind, isDragging } = useDraggable(
     position,
@@ -88,11 +96,21 @@ const useInstanceLogic = (productId, instanceId, gltfPath, initialPosition, view
       // For each instance, perform a new clone from the cached template  
       const instanceClone = baseClone.clone();
       // NEW: ensure each instance gets its own material copies by re‑cloning them.
+      const names = [];
       instanceClone.traverse((child) => {
         if (child.isMesh && child.material) {
           child.material = child.material.clone();
+          // Clear snapshot caches carried over from the clone so per-instance edits
+          // are taken from the fresh clone's actual state.
+          if (Array.isArray(child.material)) {
+            child.material.forEach((m) => { m.userData = {}; });
+          } else {
+            child.material.userData = {};
+          }
+          if (child.name) names.push(child.name);
         }
       });
+      setMeshNames(Array.from(new Set(names)));
       setClonedScene(instanceClone);
 
       mixer.current = new THREE.AnimationMixer(instanceClone);
@@ -169,6 +187,23 @@ const useInstanceLogic = (productId, instanceId, gltfPath, initialPosition, view
     useBuildStore.getState().updateInstanceRotation(productId, instanceId, rotationY);
   }, [rotationY, productId, instanceId]);
 
+  // Re-apply the live customization (color + material preset + per-mesh overrides)
+  // whenever it changes in the store or the cloned scene becomes available.
+  useEffect(() => {
+    if (!clonedScene) return;
+    applyCustomizationToScene(clonedScene, customization || {});
+  }, [clonedScene, customization]);
+
+  // Highlight the currently-targeted sub-mesh (if any).
+  useEffect(() => {
+    if (!clonedScene) return;
+    if (selectedMeshName) {
+      highlightMesh(clonedScene, selectedMeshName);
+    } else {
+      clearHighlight(clonedScene);
+    }
+  }, [clonedScene, selectedMeshName]);
+
   return {
     clonedScene,
     position,
@@ -190,10 +225,15 @@ const useInstanceLogic = (productId, instanceId, gltfPath, initialPosition, view
     },
     handleCloseMenu: () => {
       setShowRotateButton(false);
+      setSelectedMeshName(null);
     },
     isLoading: loading || !clonedScene,
     isAnimationComplete,
     resetAnimation,
+    customization,
+    selectedMeshName,
+    setSelectedMeshName,
+    meshNames,
   };
 };
 

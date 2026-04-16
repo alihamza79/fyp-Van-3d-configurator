@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Camera, Save, ShoppingCart, X } from 'lucide-react';
+import { ChevronLeft, Camera, Save, ShoppingCart, X, Brush } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProductStore } from '../store/productStore';
 import { useBuildStore } from '../store/buildStore';
+import { useVanCustomizationStore } from '../store/vanCustomizationStore';
 import toast from 'react-hot-toast';
 import { IconButton } from './ui/IconButton';
 import { Tooltip } from './ui/Tooltip';
 import { PriceTag } from './navbar/PriceTag';
 import { BuildDropdown } from './navbar/BuildDropdown';
 import PresetDropdown from './navbar/PresetDropdown';
+import { LightingDropdown } from './navbar/LightingDropdown';
 import { saveAs } from 'file-saver';
 
 import presetsData from '../data/presets.json';
@@ -63,6 +65,8 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isNavbarVisible, cameraConfig, s
   const vanProducts = useProductStore(state => state.vanProducts);
   const productInstances = useBuildStore(state => state.productInstances);
   const quantity = useProductStore((state) => state.vanProducts.length);
+  const paintMode = useVanCustomizationStore((state) => state.paintMode);
+  const setPaintMode = useVanCustomizationStore((state) => state.setPaintMode);
 
   useEffect(() => {
     loadSavedBuilds();
@@ -163,6 +167,20 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isNavbarVisible, cameraConfig, s
         </div>
 
         <div className="flex items-center gap-4">
+          <Tooltip content={paintMode ? 'Exit Paint Mode' : 'Paint Van Exterior'}>
+            <button
+              onClick={() => setPaintMode(!paintMode)}
+              className={`p-1.5 rounded-full transition-colors ${
+                paintMode
+                  ? 'bg-[#f5c34b] text-gray-900 shadow-sm'
+                  : 'hover:bg-gray-100 text-gray-700'
+              }`}
+              aria-label="Paint Van"
+            >
+              <Brush className="w-5 h-5" />
+            </button>
+          </Tooltip>
+          <LightingDropdown />
           <IconButton icon={Camera} onClick={handleTakeSnapshot} tooltip="Take Screenshot" />
           <IconButton icon={Save} onClick={handleSaveBuild} tooltip="Save Current Build" />
           

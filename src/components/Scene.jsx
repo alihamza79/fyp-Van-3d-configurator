@@ -7,6 +7,8 @@ import CameraUpdater from './CameraUpdater';
 import useSelectionStore from '../store/selectionStore';
 import GreenField from './GreenField';
 import LoadingScreen from './LoadingScreen';
+import { useEnvironmentStore } from '../store/environmentStore';
+import { LIGHTING_PRESETS } from '../data/lightingPresets';
 
 const generateFieldPositions = (gridSize, spacing) => {
   const positions = [];
@@ -36,6 +38,8 @@ const Scene = ({
   const setSelectedObject = useSelectionStore(state => state.setSelectedObject);
   const fieldPositions = generateFieldPositions(gridSize, spacing);
   const canvasRef = useRef();
+  const lightingPresetKey = useEnvironmentStore((s) => s.lightingPreset);
+  const lighting = LIGHTING_PRESETS[lightingPresetKey] || LIGHTING_PRESETS.day;
 
   useEffect(() => {
     const handleResize = () => {
@@ -61,17 +65,16 @@ const Scene = ({
       className="w-full h-full"
       style={{ position: 'absolute', top: 0, left: 0 }}
     >
-      {/* Hemisphere Light for ambient sky and ground lighting */}
       <hemisphereLight
-        skyColor="#ffffff"
-        groundColor="#444444"
-        intensity={0.5} // Increased intensity for a lighter environment
+        skyColor={lighting.hemi.sky}
+        groundColor={lighting.hemi.ground}
+        intensity={lighting.hemi.intensity}
       />
 
-      {/* Enhanced Directional Lights */}
       <directionalLight
-        position={[10, 15, 10]}
-        intensity={2.5} // Increased intensity for more light
+        position={lighting.keyLight.position}
+        color={lighting.keyLight.color}
+        intensity={lighting.keyLight.intensity}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
@@ -82,8 +85,9 @@ const Scene = ({
         shadow-camera-bottom={-20}
       />
       <directionalLight
-        position={[-10, 15, -10]}
-        intensity={1.5} // Increased intensity for more light
+        position={lighting.fillLight.position}
+        color={lighting.fillLight.color}
+        intensity={lighting.fillLight.intensity}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
@@ -94,13 +98,15 @@ const Scene = ({
         shadow-camera-bottom={-20}
       />
 
-      {/* Ambient Light for subtle illumination */}
-      <ambientLight intensity={0.1} /> // Increased ambient light for a brighter scene
+      <ambientLight intensity={lighting.ambient} />
 
       {/* Green Field */}
       {/* {fieldPositions.map((position, index) => (
         <GreenField key={index} position={position} />
       ))} */}
+      {!lighting.background && lighting.backgroundColor !== null && (
+        <color attach="background" args={[lighting.backgroundColor || '#0a0e1f']} />
+      )}
       <Suspense fallback={isLoading ? <LoadingScreen onLoadingComplete={() => setIsLoading(false)} /> : null}>
         <SceneCG />
         <VanModel
@@ -108,7 +114,11 @@ const Scene = ({
           cameraPosition={cameraPosition}
           view={view}
         />
-        <Environment files="Meadows.hdr" background />
+        <Environment
+          files="Meadows.hdr"
+          background={lighting.background}
+          environmentIntensity={lighting.envIntensity}
+        />
       </Suspense>
 
       {/* Camera Updater with FOV */}
