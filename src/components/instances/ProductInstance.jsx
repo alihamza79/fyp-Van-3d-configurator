@@ -8,6 +8,11 @@ import PreLoader from '../preLoader';
 import { showCustomToast } from '../../utils/toast';
 import { FiArrowUp, FiArrowDown } from 'react-icons/fi';
 import { useCustomizePanelStore } from '../../store/customizePanelStore';
+import { useBuildStore } from '../../store/buildStore';
+
+// How much to lift/lower on a single toolbar-button click. The keyboard path
+// uses a different step size (see useInstanceLogic.js).
+const NUDGE_STEP = 0.05;
 
 const arrowVariants = {
   animate: {
@@ -29,6 +34,7 @@ const ProductInstance = ({ productId, id, initialPosition, view, onCopy, onRemov
     clonedScene,
     isLoading,
     position,
+    setPosition,
     rotationY,
     setRotationY,
     showRotateButton,
@@ -42,10 +48,23 @@ const ProductInstance = ({ productId, id, initialPosition, view, onCopy, onRemov
     isAnimationComplete,
     resetAnimation,
     setSelectedMeshName,
+    yBounds,
   } = useInstanceLogic(productId, id, modelPath, initialPosition, view, vanBounds, isPlaying, yAxisMove);
 
+  const [yMin, yMax] = yBounds;
+  const canNudgeUp = position[1] < yMax - 1e-4;
+  const canNudgeDown = position[1] > yMin + 1e-4;
+
+  const nudgeY = (dy) => {
+    const next = Math.max(yMin, Math.min(yMax, position[1] + dy));
+    if (next === position[1]) return;
+    const newPos = [position[0], next, position[2]];
+    setPosition(newPos);
+    useBuildStore.getState().updateInstancePosition(productId, id, newPos);
+  };
+
   useEffect(() => {
-    if (yAxisMove && !hasShownToast && view !== 'default') {
+    if (!hasShownToast && view !== 'default') {
       const VerticalArrows = (
         <div>
           <motion.div variants={arrowVariants} animate="animate">
@@ -59,14 +78,14 @@ const ProductInstance = ({ productId, id, initialPosition, view, onCopy, onRemov
 
       showCustomToast({
         icon: VerticalArrows,
-        title: "Vertical Movement Enabled for this Product",
-        detail: "Use Up/Down arrow keys while hovering to adjust height",
-        duration: 4000
+        title: "Move parts up and down",
+        detail: "Hover any part and press ↑ / ↓ (hold Shift for fine steps), or use the ↑↓ buttons in the toolbar.",
+        duration: 4500,
       });
 
       setHasShownToast(true);
     }
-  }, [yAxisMove, hasShownToast, view]);
+  }, [hasShownToast, view]);
 
   const handlePlayAnimation = () => {
     setIsPlaying((prevIsPlaying) => !prevIsPlaying);
@@ -144,6 +163,10 @@ const ProductInstance = ({ productId, id, initialPosition, view, onCopy, onRemov
           instanceId={id}
           productName={productName}
           modelPath={modelPath}
+          onNudgeUp={() => nudgeY(NUDGE_STEP)}
+          onNudgeDown={() => nudgeY(-NUDGE_STEP)}
+          canNudgeUp={canNudgeUp}
+          canNudgeDown={canNudgeDown}
         />
       )}
 

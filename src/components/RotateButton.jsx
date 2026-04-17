@@ -1,7 +1,7 @@
 import { FiRotateCcw } from 'react-icons/fi';
 import { Html } from '@react-three/drei';
 import React, { useRef, useState } from 'react';
-import { ShoppingBag, Replace, Grid, Copy, Trash, Play, Palette } from 'lucide-react';
+import { ShoppingBag, Replace, Grid, Copy, Trash, Play, Palette, ArrowUp, ArrowDown } from 'lucide-react';
 import useClickOutside from '../hooks/useClickOutside';
 import DiscreteSlider from './DiscreteSlider';
 import { useCustomizePanelStore } from '../store/customizePanelStore';
@@ -20,6 +20,10 @@ const RotateButton = ({
   instanceId,
   productName,
   modelPath,
+  onNudgeUp,
+  onNudgeDown,
+  canNudgeUp = true,
+  canNudgeDown = true,
 }) => {
   const buttonRef = useRef(null);
   const [isSliderVisible, setIsSliderVisible] = useState(false);
@@ -55,6 +59,24 @@ const RotateButton = ({
       onClick: () => setIsSliderVisible((prev) => !prev),
     },
     {
+      icon: ArrowUp,
+      label: 'Up',
+      onClick: canNudgeUp ? onNudgeUp : undefined,
+      disabled: !canNudgeUp,
+      title: canNudgeUp
+        ? 'Move up (ArrowUp / Shift+ArrowUp for fine)'
+        : 'At ceiling',
+    },
+    {
+      icon: ArrowDown,
+      label: 'Down',
+      onClick: canNudgeDown ? onNudgeDown : undefined,
+      disabled: !canNudgeDown,
+      title: canNudgeDown
+        ? 'Move down (ArrowDown / Shift+ArrowDown for fine)'
+        : 'At floor',
+    },
+    {
       icon: Palette,
       label: 'Customize',
       featured: true,
@@ -88,14 +110,17 @@ const RotateButton = ({
             return (
               <React.Fragment key={tool.label}>
                 <div
-                  className={`flex flex-col items-center gap-0.5 transition-colors relative cursor-pointer ${
-                    isActive
-                      ? 'text-[#f5c34b]'
+                  className={`flex flex-col items-center gap-0.5 transition-colors relative ${
+                    tool.disabled
+                      ? 'text-gray-600 opacity-40 cursor-not-allowed'
+                      : isActive
+                      ? 'text-[#f5c34b] cursor-pointer'
                       : tool.featured
-                      ? 'text-[#f5c34b] hover:text-amber-300'
-                      : 'text-gray-300 hover:text-white'
+                      ? 'text-[#f5c34b] hover:text-amber-300 cursor-pointer'
+                      : 'text-gray-300 hover:text-white cursor-pointer'
                   }`}
-                  onClick={tool.onClick}
+                  onClick={tool.disabled ? undefined : tool.onClick}
+                  title={tool.title || tool.label}
                 >
                   <button aria-label={tool.label}>
                     <Icon size={16} />

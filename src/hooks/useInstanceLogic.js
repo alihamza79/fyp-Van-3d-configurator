@@ -11,6 +11,20 @@ import { applyCustomizationToScene, highlightMesh, clearHighlight } from '../uti
 // Global cache for processed GLTF scenes keyed by gltfPath
 const sceneCache = {};
 
+// Sensible default Y range for furniture inside the van interior.
+// - Floor-standing items originate at y = -0.8, so -0.9 prevents them from
+//   sinking below the floor while still allowing a small tolerance.
+// - Solar panel (roof) sits at y = 1.27 and vent at y = 1.15, so 1.3 is a
+//   good ceiling cap. Individual products can override either bound by
+//   adding { y: [min, max] } to their vanBounds entry in productConfig.js.
+const DEFAULT_Y_BOUNDS = [-0.9, 1.3];
+
+const resolveYBounds = (bounds) => {
+  const y = bounds?.y;
+  if (Array.isArray(y) && y.length === 2) return y;
+  return DEFAULT_Y_BOUNDS;
+};
+
 const useInstanceLogic = (productId, instanceId, gltfPath, initialPosition, view, vanBounds, isPlaying, yAxisMove = false) => {
   const { scene, animations, loading } = useGLTF(gltfPath, true, true);
   const mixer = useRef();
@@ -145,32 +159,40 @@ const useInstanceLogic = (productId, instanceId, gltfPath, initialPosition, view
     }
   }, [isPlaying, animations]);
 
-  // NEW: Add keyboard control for y-axis movement when the instance is hovered,
-  // only if yAxisMove flag is true.
+  // Keyboard control for Y-axis (vertical) movement. Previously this was
+  // gated on a per-product `yAxisMove` flag which made most furniture
+  // impossible to lift off the floor. Now every instance listens when it's
+  // either hovered OR has its toolbar open — so once you click a bed and the
+  // toolbar appears, the arrow keys keep working even if the mouse drifts
+  // onto the toolbar itself or empty space.
   useEffect(() => {
-    // Only add y-axis keyboard control if yAxisMove is enabled for this instance
-    if (!yAxisMove) return;
-
     const handleKeyDown = (event) => {
-      // Only allow y-axis movement if the instance is hovered
-      if (!isHovered) return; 
-      const moveAmount = 0.01;
-      if (event.key === "ArrowUp") {
-        const newPos = [position[0], position[1] + moveAmount, position[2]];
-        setPosition(newPos);
-        useBuildStore.getState().updateInstancePosition(productId, instanceId, newPos);
-      } else if (event.key === "ArrowDown") {
-        const newPos = [position[0], position[1] - moveAmount, position[2]];
-        setPosition(newPos);
-        useBuildStore.getState().updateInstancePosition(productId, instanceId, newPos);
-      }
+      if (!isHovered && !showRotateButton) return;
+      if (view === 'default') return;
+      if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+
+      const target = event.target;
+      const isTyping =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable);
+      if (isTyping) return;
+
+      event.preventDefault();
+      const moveAmount = event.shiftKey ? 0.01 : 0.05;
+      const dy = event.key === 'ArrowUp' ? moveAmount : -moveAmount;
+      const [yMin, yMax] = resolveYBounds(vanBounds);
+      const nextY = Math.max(yMin, Math.min(yMax, position[1] + dy));
+      if (nextY === position[1]) return; // At a boundary already.
+      const newPos = [position[0], nextY, position[2]];
+      setPosition(newPos);
+      useBuildStore.getState().updateInstancePosition(productId, instanceId, newPos);
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isHovered, yAxisMove, position, productId, instanceId]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isHovered, showRotateButton, view, position, productId, instanceId, vanBounds]);
 
   const resetAnimation = () => {
     if (mixer.current) {
@@ -233,6 +255,7 @@ const useInstanceLogic = (productId, instanceId, gltfPath, initialPosition, view
     customization,
     selectedMeshName,
     setSelectedMeshName,
+    yBounds: resolveYBounds(vanBounds),
     meshNames,
   };
 };
