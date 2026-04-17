@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { a } from '@react-spring/three';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import RotateButton from '../RotateButton';
 import BigDot from '../BigDot';
 import useInstanceLogic from '../../hooks/useInstanceLogic';
 import PreLoader from '../preLoader';
 import { showCustomToast } from '../../utils/toast';
 import { FiArrowUp, FiArrowDown } from 'react-icons/fi';
-import { useBuildStore } from '../../store/buildStore';
-import toast from 'react-hot-toast';
-import { MATERIAL_PRESETS } from '../../data/materialPresets';
+import { useCustomizePanelStore } from '../../store/customizePanelStore';
 
 const arrowVariants = {
   animate: {
@@ -23,7 +21,7 @@ const arrowVariants = {
   }
 };
 
-const ProductInstance = ({ productId, id, initialPosition, view, onCopy, onRemove, modelPath, scale, dimensions, vanBounds, yAxisMove }) => {
+const ProductInstance = ({ productId, id, initialPosition, view, onCopy, onRemove, modelPath, scale, dimensions, vanBounds, yAxisMove, productName }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasShownToast, setHasShownToast] = useState(false);
 
@@ -36,7 +34,6 @@ const ProductInstance = ({ productId, id, initialPosition, view, onCopy, onRemov
     showRotateButton,
     setShowRotateButton,
     showBigDot,
-    isHovered,
     setIsHovered,
     cabinetRef,
     bind,
@@ -44,15 +41,8 @@ const ProductInstance = ({ productId, id, initialPosition, view, onCopy, onRemov
     handleCloseMenu,
     isAnimationComplete,
     resetAnimation,
-    customization,
-    selectedMeshName,
     setSelectedMeshName,
-    meshNames,
   } = useInstanceLogic(productId, id, modelPath, initialPosition, view, vanBounds, isPlaying, yAxisMove);
-
-  const updateInstanceCustomization = useBuildStore((s) => s.updateInstanceCustomization);
-  const resetInstanceCustomization = useBuildStore((s) => s.resetInstanceCustomization);
-  const resetAllInstanceCustomization = useBuildStore((s) => s.resetAllInstanceCustomization);
 
   useEffect(() => {
     if (yAxisMove && !hasShownToast && view !== 'default') {
@@ -94,33 +84,21 @@ const ProductInstance = ({ productId, id, initialPosition, view, onCopy, onRemov
     }
   };
 
-  // Apply color/material either to the targeted sub-mesh or the whole product.
-  const targetKey = selectedMeshName || null;
-  const currentColor = targetKey
-    ? customization?.perMesh?.[targetKey]?.color
-    : customization?.color;
-  const currentPreset = targetKey
-    ? customization?.perMesh?.[targetKey]?.materialPreset
-    : customization?.materialPreset;
-
-  const handleColorChange = (color) => {
-    updateInstanceCustomization(productId, id, { color }, targetKey);
-  };
-  const handlePresetChange = (materialPreset) => {
-    updateInstanceCustomization(productId, id, { materialPreset }, targetKey);
-    const label = MATERIAL_PRESETS[materialPreset]?.label || materialPreset;
-    const scope = targetKey ? `part "${targetKey}"` : 'product';
-    toast.success(`Applied ${label} finish to ${scope}`, { duration: 1500 });
-  };
-  const handleResetCustomization = () => {
-    resetInstanceCustomization(productId, id, targetKey);
-    toast(targetKey ? `Reset part "${targetKey}"` : 'Reset whole product', { icon: '↺', duration: 1400 });
-  };
-  const handleResetAllCustomization = () => {
-    resetAllInstanceCustomization(productId, id);
-    setSelectedMeshName(null);
-    toast.success('All customization cleared for this product', { duration: 1500 });
-  };
+  // If this instance unmounts (e.g. user hit "Remove") while the customize
+  // experience (side panel or workspace) is targeting it, close those so
+  // they don't leave a stale target pointing at a deleted instance.
+  useEffect(() => {
+    return () => {
+      const state = useCustomizePanelStore.getState();
+      const panelHere = state.open && state.target?.kind === 'product'
+        && state.target.productId === productId
+        && state.target.instanceId === id;
+      const workspaceHere = state.workspace?.productId === productId
+        && state.workspace?.instanceId === id;
+      if (workspaceHere) state.closeWorkspace();
+      else if (panelHere) state.closePanel();
+    };
+  }, [productId, id]);
 
   if (isLoading) {
     return (
@@ -162,16 +140,10 @@ const ProductInstance = ({ productId, id, initialPosition, view, onCopy, onRemov
           onPlayAnimation={handlePlayAnimation}
           isAnimationComplete={isAnimationComplete}
           resetAnimation={resetAnimation}
-          color={currentColor}
-          materialPreset={currentPreset}
-          onColorChange={handleColorChange}
-          onPresetChange={handlePresetChange}
-          onResetCustomization={handleResetCustomization}
-          onResetAllCustomization={handleResetAllCustomization}
-          selectedMeshName={selectedMeshName}
-          onClearMeshTarget={() => setSelectedMeshName(null)}
-          meshNames={meshNames}
-          onSelectMesh={setSelectedMeshName}
+          productId={productId}
+          instanceId={id}
+          productName={productName}
+          modelPath={modelPath}
         />
       )}
 

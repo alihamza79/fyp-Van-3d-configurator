@@ -169,6 +169,7 @@ const VanModel = ({
             dimensions={product.dimensions}
             vanBounds={product.vanBounds}
             yAxisMove={product.yAxisMove}
+            productName={product.name}
           />
         );
       })}

@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import { ShoppingBag, Replace, Grid, Copy, Trash, Play, Palette } from 'lucide-react';
 import useClickOutside from '../hooks/useClickOutside';
 import DiscreteSlider from './DiscreteSlider';
-import MaterialPanel from './MaterialPanel';
+import { useCustomizePanelStore } from '../store/customizePanelStore';
 
 const RotateButton = ({
   position,
@@ -16,44 +16,49 @@ const RotateButton = ({
   onPlayAnimation,
   isAnimationComplete,
   resetAnimation,
-  color,
-  materialPreset,
-  onColorChange,
-  onPresetChange,
-  onResetCustomization,
-  onResetAllCustomization,
-  selectedMeshName,
-  onClearMeshTarget,
-  meshNames = [],
-  onSelectMesh,
+  productId,
+  instanceId,
+  productName,
+  modelPath,
 }) => {
   const buttonRef = useRef(null);
   const [isSliderVisible, setIsSliderVisible] = useState(false);
-  const [isMaterialPanelVisible, setIsMaterialPanelVisible] = useState(false);
 
-  // Only dismiss when clicking outside BOTH the toolbar AND the material panel.
+  const workspace = useCustomizePanelStore((s) => s.workspace);
+  const openWorkspace = useCustomizePanelStore((s) => s.openWorkspace);
+
+  const isThisWorkspace =
+    workspace?.productId === productId && workspace?.instanceId === instanceId;
+
   useClickOutside(buttonRef, () => {
-    if (!isMaterialPanelVisible) onClose();
+    // While this product's dedicated workspace is open the toolbar isn't
+    // rendered anyway, but guard just in case React batches a late close.
+    if (isThisWorkspace) return;
+    onClose();
   });
+
+  const handleCustomizeClick = () => {
+    openWorkspace({
+      kind: 'product',
+      productId,
+      instanceId,
+      productName: productName || 'Product',
+      modelPath,
+    });
+  };
 
   const tools = [
     { icon: ShoppingBag, label: 'Add' },
     {
       icon: FiRotateCcw,
       label: 'Rotate',
-      onClick: () => {
-        setIsSliderVisible((prev) => !prev);
-        setIsMaterialPanelVisible(false);
-      },
+      onClick: () => setIsSliderVisible((prev) => !prev),
     },
     {
       icon: Palette,
       label: 'Customize',
       featured: true,
-      onClick: () => {
-        setIsMaterialPanelVisible((prev) => !prev);
-        setIsSliderVisible(false);
-      },
+      onClick: handleCustomizeClick,
     },
     { icon: Replace, label: 'Replace' },
     { icon: Grid, label: 'Goes with' },
@@ -66,6 +71,12 @@ const RotateButton = ({
     { icon: Trash, label: 'Remove', onClick: onRemove },
   ];
 
+  // While the dedicated customize workspace is open for this product, the
+  // entire main scene (including this toolbar) is unmounted by App.jsx, so
+  // no explicit early return is needed here. Still, keep it as a belt-and-
+  // suspenders guard for any transition frame where both may overlap.
+  if (isThisWorkspace) return null;
+
   return (
     <Html position={[position[0], position[1] + 0.5, position[2]]} center>
       <div ref={buttonRef} className="relative inline-block">
@@ -73,7 +84,6 @@ const RotateButton = ({
           {tools.map((tool, index) => {
             const Icon = tool.icon;
             const isActive =
-              (tool.label === 'Customize' && isMaterialPanelVisible) ||
               (tool.label === 'Rotate' && isSliderVisible);
             return (
               <React.Fragment key={tool.label}>
@@ -118,27 +128,6 @@ const RotateButton = ({
             );
           })}
         </div>
-
-        {isMaterialPanelVisible && (
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 z-50">
-            <MaterialPanel
-              open={isMaterialPanelVisible}
-              onClose={() => setIsMaterialPanelVisible(false)}
-              color={color}
-              materialPreset={materialPreset}
-              onColorChange={onColorChange}
-              onPresetChange={onPresetChange}
-              onReset={onResetCustomization}
-              onResetAll={onResetAllCustomization}
-              title="Customize Part"
-              selectedPartLabel={selectedMeshName || 'Whole product'}
-              canTargetParts
-              onClearTarget={onClearMeshTarget}
-              partList={meshNames}
-              onSelectPart={onSelectMesh}
-            />
-          </div>
-        )}
       </div>
     </Html>
   );

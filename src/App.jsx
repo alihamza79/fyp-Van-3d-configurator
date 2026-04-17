@@ -8,9 +8,12 @@ import Sidebar from './components/Sidebar';
 import ViewSelector from './components/ViewSelector';
 import Navbar from './components/Navbar';
 import VanPaintPanel from './components/VanPaintPanel';
+import CustomizePanel from './components/CustomizePanel';
+import CustomizeWorkspace from './components/CustomizeWorkspace';
 import ShortcutsHelp from './components/ShortcutsHelp';
 import { Toaster } from 'react-hot-toast';
 import {useProductStore} from './store/productStore';
+import { useCustomizePanelStore } from './store/customizePanelStore';
 
 const App = () => {
   const [cameraPosition, setCameraPosition] = useState([5, 2, 5]);
@@ -124,9 +127,20 @@ const App = () => {
   // Retrieve the products from the global product store.
   const products = useProductStore((state) => state.products);
 
+  // When a dedicated customize workspace is active, hide the main scene UI
+  // (navbar, sidebar, canvas, zoom, view selector) so the user has the full
+  // viewport for picking colors/materials on the selected product. We hide
+  // (not unmount) so state like current view/camera/zoom is preserved when
+  // the user exits the workspace.
+  const workspace = useCustomizePanelStore((s) => s.workspace);
+
   return (
     <>
-      <div className="flex h-screen bg-gray-100">
+      <div
+        className="flex h-screen bg-gray-100"
+        style={workspace ? { visibility: 'hidden', pointerEvents: 'none' } : undefined}
+        aria-hidden={workspace ? 'true' : 'false'}
+      >
         <Navbar 
           toggleSidebar={handleToggle}
           isSidebarOpen={isSidebarOpen}
@@ -202,6 +216,8 @@ const App = () => {
         </div>
       </div>
       <VanPaintPanel />
+      <CustomizePanel />
+      <CustomizeWorkspace />
       <ShortcutsHelp />
       <Toaster />
     </>

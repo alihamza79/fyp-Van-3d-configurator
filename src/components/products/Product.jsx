@@ -4,7 +4,7 @@ import ProductInstance from '../instances/ProductInstance';
 import { v4 as uuidv4 } from 'uuid';
 import { useProductStore } from '../../store/productStore';
 
-const Product = ({ productId, view, modelPath, scale, initialPosition, dimensions, vanBounds, yAxisMove }) => {
+const Product = ({ productId, view, modelPath, scale, initialPosition, dimensions, vanBounds, yAxisMove, productName }) => {
   const { productInstances, addInstance, removeInstance, setInstances } = useBuildStore();
   const instances = productInstances[productId] || [];
 
@@ -53,6 +53,7 @@ const Product = ({ productId, view, modelPath, scale, initialPosition, dimension
           dimensions={dimensions}
           vanBounds={vanBounds}
           yAxisMove={yAxisMove}
+          productName={productName}
         />
       ))}
     </>

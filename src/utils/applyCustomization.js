@@ -1,8 +1,20 @@
 import * as THREE from 'three';
 import { MATERIAL_PRESETS } from '../data/materialPresets';
+import { getMaterialTextures } from './textureFactory';
 
-// Snapshot the original properties of a material so we can restore them
-// when the user picks "Original".
+// ---------------------------------------------------------------------------
+// applyCustomization
+//
+// Applies { color, materialPreset } (optionally per-mesh) onto any scene.
+// Materials must be PBR (MeshStandardMaterial-compatible) - both the van
+// and every product GLB already use MeshStandardMaterial after GLTF import.
+//
+// When a preset enables `useTexture`, we swap in procedurally-generated
+// texture maps (diffuse, roughness, normal) from textureFactory.js. The
+// original maps are snapshotted so switching back to "Original" fully
+// restores the mesh.
+// ---------------------------------------------------------------------------
+
 const snapshotMaterial = (material) => {
   if (material.userData.__original) return;
   material.userData.__original = {
@@ -10,11 +22,11 @@ const snapshotMaterial = (material) => {
     roughness: material.roughness,
     metalness: material.metalness,
     envMapIntensity: material.envMapIntensity ?? 1,
-    // Snapshot texture maps so we can temporarily disable them on preset
-    // changes (otherwise metalnessMap/roughnessMap multiply out our values
-    // and the finish change is visually invisible).
+    map: material.map ?? null,
     metalnessMap: material.metalnessMap ?? null,
     roughnessMap: material.roughnessMap ?? null,
+    normalMap: material.normalMap ?? null,
+    normalScale: material.normalScale ? material.normalScale.clone() : null,
   };
 };
 
@@ -25,8 +37,13 @@ const restoreOriginal = (material) => {
   if (typeof orig.roughness === 'number') material.roughness = orig.roughness;
   if (typeof orig.metalness === 'number') material.metalness = orig.metalness;
   if (typeof orig.envMapIntensity === 'number') material.envMapIntensity = orig.envMapIntensity;
+  material.map = orig.map;
   material.metalnessMap = orig.metalnessMap;
   material.roughnessMap = orig.roughnessMap;
+  material.normalMap = orig.normalMap;
+  if (orig.normalScale && material.normalScale) {
+    material.normalScale.copy(orig.normalScale);
+  }
 };
 
 const applyToMaterial = (material, customization) => {
@@ -38,11 +55,30 @@ const applyToMaterial = (material, customization) => {
 
   if (hasExplicitPreset) {
     const p = MATERIAL_PRESETS[preset];
-    // Disable metalness/roughness maps so our scalar values aren't multiplied
-    // down to zero by the baked texture. We keep the diffuse map so the
-    // chosen color still tints against the original surface artwork.
-    material.metalnessMap = null;
-    material.roughnessMap = null;
+
+    if (p.useTexture) {
+      const textures = getMaterialTextures(p.textureKey || preset);
+      if (textures) {
+        material.map = textures.map || null;
+        material.roughnessMap = textures.roughnessMap || null;
+        material.normalMap = textures.normalMap || null;
+        // Metalness is scalar for textured presets; the brushed metal normal
+        // map already gives directional reflection variance.
+        material.metalnessMap = null;
+        if (material.normalScale) {
+          material.normalScale.set(1, 1);
+        }
+      }
+    } else {
+      // Scalar preset: strip the original metalness/roughness maps so scalar
+      // values actually take effect, and clear any texture we may have set
+      // previously.
+      material.map = material.userData.__original?.map ?? null;
+      material.metalnessMap = null;
+      material.roughnessMap = null;
+      material.normalMap = material.userData.__original?.normalMap ?? null;
+    }
+
     if (typeof p.roughness === 'number') material.roughness = p.roughness;
     if (typeof p.metalness === 'number') material.metalness = p.metalness;
     if (typeof p.envMapIntensity === 'number') material.envMapIntensity = p.envMapIntensity;
@@ -89,7 +125,8 @@ export const applyCustomizationToScene = (scene, customization) => {
   });
 };
 
-// Highlight utility — adds an emissive outline to a single mesh.
+// Highlight utility — adds an emissive outline to a single mesh so the user
+// can see which sub-mesh they've shift-clicked.
 const HIGHLIGHT_COLOR = new THREE.Color(0xf5c34b);
 
 export const highlightMesh = (scene, meshName) => {
